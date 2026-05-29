@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — Calcul littéral 5ᵉ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --creme:#fbf4e6;
+    --creme-fonce:#f3e7cf;
+    --encre:#2b2a36;
+    --indigo:#3a3a8c;
+    --indigo-clair:#6c6cd6;
+    --corail:#ee6c4d;
+    --vert:#5a9e6f;
+    --vert-clair:#e4f1e6;
+    --rouge:#d9534f;
+    --rouge-clair:#fbe4e3;
+    --jaune:#f4c430;
+    --ombre:0 6px 0 rgba(43,42,54,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Lexend',sans-serif;
+    color:var(--encre);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(244,196,48,.18), transparent 30%),
+      radial-gradient(circle at 88% 92%, rgba(108,108,214,.14), transparent 34%),
+      var(--creme);
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.6;
+    padding:0 0 60px;
+  }
+  .ruban{
+    background:var(--indigo);color:#fff;padding:6px 0;
+    font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+    text-align:center;font-weight:500;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 20px}
+
+  header.titre{text-align:center;margin:30px 0 6px}
+  header.titre .matiere{
+    font-family:'Fredoka',sans-serif;color:var(--corail);font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;font-size:.95rem;
+  }
+  header.titre h1{
+    font-family:'Fredoka',sans-serif;font-weight:700;
+    font-size:clamp(1.9rem,5.5vw,2.8rem);color:var(--indigo);line-height:1.05;
+  }
+  header.titre .niveau{
+    display:inline-block;background:var(--jaune);color:var(--encre);
+    font-weight:600;padding:3px 16px;border-radius:999px;font-size:.9rem;
+    margin-top:8px;box-shadow:0 3px 0 rgba(43,42,54,.15);
+  }
+
+  .barre-prog{
+    height:12px;background:var(--creme-fonce);border-radius:999px;
+    margin:26px 0 6px;overflow:hidden;border:2px solid var(--creme-fonce);
+  }
+  .barre-prog span{
+    display:block;height:100%;width:0;border-radius:999px;
+    background:linear-gradient(90deg,var(--corail),var(--jaune));
+    transition:width .4s ease;
+  }
+  .compteur{
+    text-align:right;font-size:.85rem;color:var(--indigo);font-weight:500;margin-bottom:18px;
+  }
+
+  .carte{
+    background:#fff;border-radius:22px;padding:28px 26px;
+    box-shadow:var(--ombre);border:2px solid var(--creme-fonce);
+  }
+  .consigne{font-size:.9rem;color:var(--corail);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .question{
+    font-family:'Fredoka',sans-serif;font-size:1.45rem;color:var(--indigo);
+    line-height:1.3;margin-bottom:22px;
+  }
+  .calc{
+    font-weight:500;background:rgba(108,108,214,.12);
+    padding:1px 8px;border-radius:6px;white-space:nowrap;
+  }
+  sup{font-size:.72em}
+
+  .options{display:flex;flex-direction:column;gap:12px}
+  button.opt{
+    font-family:'Lexend',sans-serif;font-size:1.15rem;font-weight:500;
+    text-align:left;color:var(--encre);background:var(--creme);
+    border:2px solid var(--creme-fonce);border-radius:14px;
+    padding:14px 20px;cursor:pointer;
+    transition:transform .08s ease, border-color .12s ease, background .12s ease;
+    display:flex;align-items:center;gap:14px;
+  }
+  button.opt:not(:disabled):hover{border-color:var(--indigo-clair);transform:translateX(3px)}
+  button.opt .lettre{
+    font-family:'Fredoka',sans-serif;font-weight:600;color:#fff;background:var(--indigo-clair);
+    width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+    flex-shrink:0;font-size:.95rem;transition:background .12s ease;
+  }
+  button.opt:disabled{cursor:default}
+  button.opt.juste{background:var(--vert-clair);border-color:var(--vert);color:var(--vert)}
+  button.opt.juste .lettre{background:var(--vert)}
+  button.opt.faux{background:var(--rouge-clair);border-color:var(--rouge);color:var(--rouge)}
+  button.opt.faux .lettre{background:var(--rouge)}
+  button.opt.estompe{opacity:.5}
+
+  .retour{
+    margin-top:18px;border-radius:14px;padding:16px 18px;display:none;
+  }
+  .retour.bon{background:var(--vert-clair);border:2px solid var(--vert)}
+  .retour.mauvais{background:var(--rouge-clair);border:2px solid var(--rouge)}
+  .retour .tete{font-family:'Fredoka',sans-serif;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .retour.bon .tete{color:var(--vert)}
+  .retour.mauvais .tete{color:var(--rouge)}
+  .retour .expli{margin-top:6px}
+  .retour .etape{
+    background:#fff;border-radius:10px;padding:8px 14px;margin-top:8px;
+    font-weight:500;border-left:4px solid var(--corail);
+  }
+
+  button.suivant{
+    display:none;font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.05rem;
+    color:#fff;background:var(--corail);border:none;border-radius:14px;
+    padding:13px 26px;margin-top:20px;cursor:pointer;
+    box-shadow:0 4px 0 #c9543a;transition:transform .08s ease,box-shadow .08s ease;
+  }
+  button.suivant:hover{filter:brightness(1.04)}
+  button.suivant:active{transform:translateY(3px);box-shadow:0 1px 0 #c9543a}
+
+  /* --- Écrans intro / bilan --- */
+  .ecran{text-align:center;background:#fff;border-radius:22px;padding:38px 28px;
+    box-shadow:var(--ombre);border:2px solid var(--creme-fonce)}
+  .ecran h2{font-family:'Fredoka',sans-serif;color:var(--indigo);font-size:1.8rem;margin-bottom:10px}
+  .ecran p{margin:8px 0;color:var(--encre)}
+  .gros-bouton{
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.2rem;color:#fff;
+    background:var(--indigo);border:none;border-radius:16px;padding:15px 34px;
+    cursor:pointer;margin-top:18px;box-shadow:0 5px 0 var(--indigo-clair);
+    transition:transform .08s ease,box-shadow .08s ease;
+  }
+  .gros-bouton:active{transform:translateY(4px);box-shadow:0 1px 0 var(--indigo-clair)}
+  .score-rond{
+    width:160px;height:160px;border-radius:50%;margin:14px auto 4px;
+    display:grid;place-items:center;background:var(--vert-clair);
+    border:6px solid var(--vert);
+  }
+  .score-rond .val{font-family:'Fredoka',sans-serif;font-size:2.6rem;font-weight:700;color:var(--vert);line-height:1}
+  .score-rond .sur{font-size:.95rem;color:var(--vert)}
+  .mention{font-family:'Fredoka',sans-serif;font-size:1.3rem;font-weight:600;margin-top:10px}
+  .detail{font-size:.9rem;color:var(--indigo);opacity:.8;margin-top:6px}
+
+  footer{text-align:center;color:var(--indigo);font-size:.82rem;opacity:.7;margin-top:36px}
+</style>
+</head>
+<body>
+
+<div class="ruban">Collège Jean Zay — Bondy</div>
+
+<div class="wrap">
+
+  <header class="titre">
+    <div class="matiere">Mathématiques · Calcul littéral</div>
+    <h1>Quiz d'entraînement</h1>
+    <span class="niveau">Classe de 5ᵉ</span>
+  </header>
+
+  <!-- INTRO -->
+  <div id="intro" class="ecran" style="margin-top:28px">
+    <h2>Prêt·e ?</h2>
+    <p>10 questions sur le calcul littéral. Pour chaque question, clique sur la bonne réponse.</p>
+    <p>Si tu te trompes, l'explication apparaît. Si tu as juste, on passe à la suite.</p>
+    <p>Ton score s'affiche à la fin.</p>
+    <button class="gros-bouton" onclick="demarrer()">Commencer le quiz</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz" style="display:none">
+    <div class="barre-prog"><span id="prog"></span></div>
+    <div class="compteur" id="compteur"></div>
+    <div class="carte">
+      <div class="consigne" id="consigne"></div>
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div class="retour" id="retour"></div>
+      <button class="suivant" id="suivant" onclick="suivant()"></button>
+    </div>
+  </div>
+
+  <!-- BILAN -->
+  <div id="bilan" class="ecran" style="display:none;margin-top:28px"></div>
+
+  <footer>Mathématiques · 5ᵉ · Calcul littéral — Collège Jean Zay, Bondy</footer>
+</div>
+
+<script>
+const questions = [
+  {
+    consigne:"Écriture simplifiée",
+    enonce:'Quelle est l\'écriture la plus simple de <span class="calc">7 × y</span> ?',
+    options:['<span class="calc">7y</span>','<span class="calc">y7</span>','<span class="calc">7 + y</span>','<span class="calc">14</span>'],
+    bonne:0,
+    expli:'Devant une lettre, on supprime le signe ×, et on garde le nombre devant la lettre : <span class="calc">7 × y = 7y</span>.'
+  },
+  {
+    consigne:"Écriture simplifiée",
+    enonce:'Récris <span class="calc">b × 4</span> le plus simplement possible.',
+    options:['<span class="calc">b4</span>','<span class="calc">4b</span>','<span class="calc">b + 4</span>','<span class="calc">24</span>'],
+    bonne:1,
+    expli:'On range toujours le nombre <strong>devant</strong> la lettre : <span class="calc">b × 4 = 4b</span>.'
+  },
+  {
+    consigne:"Écriture simplifiée",
+    enonce:'Quelle est l\'écriture simplifiée de <span class="calc">n × n</span> ?',
+    options:['<span class="calc">2n</span>','<span class="calc">n + n</span>','<span class="calc">n<sup>2</sup></span>','<span class="calc">nn</span>'],
+    bonne:2,
+    expli:'Multiplier une lettre par elle-même, c\'est l\'élever au carré : <span class="calc">n × n = n<sup>2</sup></span>. (Attention : <span class="calc">n + n = 2n</span>, c\'est une addition, pas une multiplication.)'
+  },
+  {
+    consigne:"Réduire",
+    enonce:'Réduis l\'expression <span class="calc">6a + 3a</span>.',
+    options:['<span class="calc">9a</span>','<span class="calc">9a<sup>2</sup></span>','<span class="calc">18a</span>','<span class="calc">9</span>'],
+    bonne:0,
+    expli:'On additionne les nombres devant les « a » : <span class="calc">6 + 3 = 9</span>, et la lettre ne change pas : <span class="calc">6a + 3a = 9a</span>.'
+  },
+  {
+    consigne:"Réduire",
+    enonce:'Réduis l\'expression <span class="calc">4a + 7 + 2a + 1</span>.',
+    options:['<span class="calc">14a</span>','<span class="calc">6a + 8</span>','<span class="calc">8a + 6</span>','<span class="calc">6a8</span>'],
+    bonne:1,
+    expli:'On regroupe les « a » ensemble et les nombres seuls ensemble : <span class="calc">4a + 2a = 6a</span> et <span class="calc">7 + 1 = 8</span>, donc <span class="calc">6a + 8</span>. On ne peut pas additionner les « a » avec les nombres.'
+  },
+  {
+    consigne:"Réduire",
+    enonce:'Que vaut <span class="calc">5y + 3</span> une fois réduit ?',
+    options:['<span class="calc">8y</span>','<span class="calc">8</span>','On ne peut pas réduire','<span class="calc">15y</span>'],
+    bonne:2,
+    expli:'<span class="calc">5y</span> et <span class="calc">3</span> ne sont pas de même nature : l\'un a une lettre, l\'autre non. On ne peut pas les additionner, l\'expression reste <span class="calc">5y + 3</span>.'
+  },
+  {
+    consigne:"Substituer",
+    enonce:'On donne <span class="calc">a = 5</span>. Combien vaut <span class="calc">3a</span> ?',
+    options:['<span class="calc">8</span>','<span class="calc">35</span>','<span class="calc">15</span>','<span class="calc">53</span>'],
+    bonne:2,
+    expli:'On remplace <span class="calc">a</span> par 5 en remettant le signe × : <span class="calc">3a = 3 × 5 = 15</span>.'
+  },
+  {
+    consigne:"Substituer",
+    enonce:'On donne <span class="calc">a = 5</span> et <span class="calc">b = 2</span>. Combien vaut <span class="calc">a + 4b</span> ?',
+    options:['<span class="calc">18</span>','<span class="calc">13</span>','<span class="calc">28</span>','<span class="calc">14</span>'],
+    bonne:1,
+    expli:'On calcule d\'abord la multiplication : <span class="calc">a + 4b = 5 + 4 × 2 = 5 + 8 = 13</span>. (La multiplication se fait avant l\'addition.)'
+  },
+  {
+    consigne:"Développer",
+    enonce:'Développe <span class="calc">3(x + 4)</span>.',
+    options:['<span class="calc">3x + 4</span>','<span class="calc">3x + 7</span>','<span class="calc">x + 12</span>','<span class="calc">3x + 12</span>'],
+    bonne:3,
+    expli:'On multiplie le 3 par <strong>chaque</strong> terme de la parenthèse : <span class="calc">3 × x + 3 × 4 = 3x + 12</span>.'
+  },
+  {
+    consigne:"Problème",
+    enonce:'Un rectangle a une longueur de <span class="calc">x</span> cm et une largeur de 5 cm. Quel est son périmètre <span class="calc">P</span> (réduit) ?',
+    options:['<span class="calc">x + 5</span>','<span class="calc">2x + 5</span>','<span class="calc">2x + 10</span>','<span class="calc">x + 10</span>'],
+    bonne:2,
+    expli:'Le périmètre est le tour : <span class="calc">x + 5 + x + 5</span>. On réduit : <span class="calc">2x + 10</span>.'
+  }
+];
+
+let i = 0, score = 0, repondu = false;
+
+const $ = id => document.getElementById(id);
+
+function demarrer(){
+  $('intro').style.display='none';
+  $('quiz').style.display='block';
+  i=0; score=0;
+  afficher();
+}
+
+function afficher(){
+  repondu=false;
+  const q = questions[i];
+  $('consigne').textContent = q.consigne;
+  $('question').innerHTML = q.enonce;
+  $('compteur').textContent = 'Question ' + (i+1) + ' / ' + questions.length;
+  $('prog').style.width = (i/questions.length*100) + '%';
+
+  const lettres = ['A','B','C','D'];
+  const opts = $('options');
+  opts.innerHTML = '';
+  q.options.forEach((txt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<span class="lettre">'+lettres[idx]+'</span><span>'+txt+'</span>';
+    b.onclick = ()=> repondre(idx, b);
+    opts.appendChild(b);
+  });
+
+  const r = $('retour');
+  r.style.display='none'; r.className='retour';
+  const s = $('suivant');
+  s.style.display='none';
+  s.textContent = (i === questions.length-1) ? 'Voir mon score' : 'Question suivante';
+}
+
+function repondre(idx, btn){
+  if(repondu) return;
+  repondu = true;
+  const q = questions[i];
+  const boutons = document.querySelectorAll('#options .opt');
+  boutons.forEach(b=> b.disabled = true);
+
+  const r = $('retour');
+  if(idx === q.bonne){
+    score++;
+    btn.classList.add('juste');
+    boutons.forEach((b,k)=>{ if(k!==idx) b.classList.add('estompe'); });
+    r.className = 'retour bon';
+    r.innerHTML = '<div class="tete">✓ Bonne réponse !</div>';
+    r.style.display='block';
+  } else {
+    btn.classList.add('faux');
+    boutons[q.bonne].classList.add('juste');
+    boutons.forEach((b,k)=>{ if(k!==idx && k!==q.bonne) b.classList.add('estompe'); });
+    r.className = 'retour mauvais';
+    r.innerHTML = '<div class="tete">✗ Ce n\'est pas la bonne réponse</div>'
+      + '<div class="expli">'+ q.expli +'</div>';
+    r.style.display='block';
+  }
+  $('suivant').style.display='inline-block';
+}
+
+function suivant(){
+  i++;
+  if(i < questions.length){
+    afficher();
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    finir();
+  }
+}
+
+function finir(){
+  $('quiz').style.display='none';
+  $('prog').style.width='100%';
+  const b = $('bilan');
+  let mention, couleur;
+  const ratio = score/questions.length;
+  if(ratio === 1){ mention='Parfait ! 🏆'; }
+  else if(ratio >= 0.8){ mention='Très bien ! 🌟'; }
+  else if(ratio >= 0.6){ mention='Bien, continue ! 👍'; }
+  else if(ratio >= 0.4){ mention='À retravailler 💪'; }
+  else { mention='Reprends les bases 📘'; }
+
+  b.innerHTML =
+    '<h2>Ton bilan</h2>'+
+    '<div class="score-rond"><div><div class="val">'+score+'</div>'+
+      '<div class="sur">sur '+questions.length+'</div></div></div>'+
+    '<div class="mention">'+mention+'</div>'+
+    '<div class="detail">Tu as réussi '+score+' question'+(score>1?'s':'')+' sur '+questions.length+'.</div>'+
+    '<button class="gros-bouton" onclick="demarrer2()">Recommencer</button>';
+  b.style.display='block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function demarrer2(){
+  $('bilan').style.display='none';
+  demarrer();
+}
+</script>
+
+</body>
+</html>
